@@ -1,0 +1,30 @@
+import datetime
+import time
+import os
+
+def display_clock():
+    """
+    Displays a real-time clock in the console.
+    The clock updates every second.
+    """
+    try:
+        while True:
+            # Clear the console screen (for a cleaner display)
+            # 'cls' for Windows, 'clear' for Linux/macOS
+            os.system('cls' if os.name == 'nt' else 'clear')
+
+            # Get the current time
+            current_time = datetime.datetime.now().strftime("%H:%M:%S")
+
+            # Print the current time
+            print("Current Time:")
+            print(f"🕰️ {current_time}")
+
+            # Wait for 1 second before updating
+            time.sleep(1)
+    except KeyboardInterrupt:
+        # Handle Ctrl+C to exit gracefully
+        print("\nClock stopped.")
+
+if __name__ == "__main__":
+    display_clock()

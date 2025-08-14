@@ -1,0 +1,99 @@
+import datetime
+import time
+import os
+
+# --- NEW: Global list to store alarm times ---
+# This list will hold datetime.time objects for each alarm set.
+alarms = []
+
+# --- NEW: Function to get alarm time input from the user ---
+def get_alarm_time():
+    """
+    Prompts the user to enter alarm times in HH:MM:SS format.
+    Validates the input and adds valid alarm times to the global 'alarms' list.
+    The user can type 'q' to stop adding alarms.
+    """
+    print("\n--- Set Your Alarms ---")
+    while True:
+        alarm_input = input("Enter alarm time (HH:MM:SS, e.g., 07:30:00) or 'q' to finish: ").strip()
+        if alarm_input.lower() == 'q':
+            break # Exit the loop if user types 'q'
+        try:
+            # Attempt to parse the input string into a datetime.time object
+            alarm_time = datetime.datetime.strptime(alarm_input, "%H:%M:%S").time()
+            alarms.append(alarm_time) # Add the valid alarm time to the list
+            print(f"Alarm set for: {alarm_time.strftime('%H:%M:%S')}")
+        except ValueError:
+            # Handle cases where the input format is incorrect
+            print("Invalid time format. Please use HH:MM:SS.")
+    print("--- Finished setting alarms ---")
+
+# --- NEW: Function to check if any alarms should go off ---
+def check_alarms():
+    """
+    Compares the current exact time (hour, minute, second) with all set alarms.
+    If a match is found, it displays an alarm message and removes the triggered alarm
+    from the list to prevent it from ringing repeatedly.
+    """
+    current_time = datetime.datetime.now().time() # Get the current precise time
+
+    # Iterate through a copy of the alarms list. This is important because
+    # we might modify the original 'alarms' list by removing elements.
+    for alarm_t in list(alarms):
+        # Check if the current hour, minute, and second exactly match the alarm's
+        if current_time.hour == alarm_t.hour and \
+           current_time.minute == alarm_t.minute and \
+           current_time.second == alarm_t.second:
+            os.system('cls' if os.name == 'nt' else 'clear') # Clear screen for alarm
+            print("\n" * 5) # Add extra newlines for visibility
+            print("*************************************")
+            print("🚨🚨 ALARM! ALARM! ALARM! 🚨🚨")
+            print(f"It's {alarm_t.strftime('%H:%M:%S')}!")
+            print("*************************************")
+            print("\n" * 5)
+            # Remove the triggered alarm so it only rings once per set time
+            alarms.remove(alarm_t)
+            # Pause briefly so the user can see the alarm message
+            time.sleep(3)
+
+# --- MODIFIED: display_clock function to include alarm checking and display ---
+def display_clock():
+    """
+    Displays a real-time clock in the console.
+    It now also continuously checks for and triggers alarms, and shows set alarms.
+    The clock updates every second.
+    """
+    try:
+        while True:
+            # Clear the console screen for a clean display
+            os.system('cls' if os.name == 'nt' else 'clear')
+
+            # Get and print the current time
+            current_time = datetime.datetime.now().strftime("%H:%M:%S")
+            print("Current Time:")
+            print(f"🕰️ {current_time}")
+
+            # Display currently set alarms, if any
+            if alarms:
+                print("\nSet Alarms:")
+                for i, alarm_t in enumerate(alarms):
+                    print(f"  Alarm {i+1}: {alarm_t.strftime('%H:%M:%S')}")
+            else:
+                print("\nNo alarms set.")
+
+            # Call the check_alarms function in each loop iteration
+            check_alarms()
+
+            # Wait for 1 second before the next update
+            time.sleep(1)
+    except KeyboardInterrupt:
+        # Graceful exit on Ctrl+C
+        print("\nClock stopped. Goodbye!")
+
+# --- MODIFIED: Main execution block ---
+if __name__ == "__main__":
+    # First, let the user set alarms
+    get_alarm_time()
+    # Then, start the clock display and alarm checking
+    print("\nStarting clock. Press Ctrl+C to stop.")
+    display_clock()
